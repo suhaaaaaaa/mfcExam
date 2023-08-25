@@ -41,4 +41,7 @@ public:
 
 	void callFunc(int n);
 	afx_msg void OnBnClickedGprjDialog();
+	afx_msg void OnBnClickedBtnProcess();
+	afx_msg void OnBnClickedBtnMakePattern();
+	afx_msg void OnBnClickedBtnGetData();
 };

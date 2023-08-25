@@ -73,7 +73,10 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_GPRJ_DIALOG, &CgPrjDlg::OnBnClickedGprjDialog)
+	ON_BN_CLICKED(IDC_BTN_TEST, &CgPrjDlg::OnBnClickedGprjDialog)
+	ON_BN_CLICKED(IDC_BTN_PROCESS, &CgPrjDlg::OnBnClickedBtnProcess)
+	ON_BN_CLICKED(IDC_BTN_MAKE_PATTERN, &CgPrjDlg::OnBnClickedBtnMakePattern)
+	ON_BN_CLICKED(IDC_BTN_GET_DATA, &CgPrjDlg::OnBnClickedBtnGetData)
 END_MESSAGE_MAP()
 
 
@@ -226,5 +229,67 @@ void CgPrjDlg::OnBnClickedGprjDialog()
 	m_pDlgImageResult->Invalidate();
 
 	
+
+}
+
+#include "Process.h"
+#include <chrono>
+void CgPrjDlg::OnBnClickedBtnProcess()
+{
+	CProcess process;
+
+	auto start = std::chrono::system_clock::now();
+	int nRet = process.getStarInfo(&m_pDlgImage->m_image, 100);
+	auto end = std::chrono::system_clock::now();
+	auto millisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+	cout << nRet << "\t" << millisec.count() <<"ms" << endl;
+}
+
+
+void CgPrjDlg::OnBnClickedBtnMakePattern()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+	int nWidth = m_pDlgImage->m_image.GetWidth();
+	int nHeight = m_pDlgImage->m_image.GetHeight();
+	int nPitch = m_pDlgImage->m_image.GetPitch();
+	memset(fm, 0, nWidth * nHeight);
+
+	CRect rect(100, 100, 200, 200);
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			fm[j * nPitch + i] = 0x81; //rand()%0xff;
+		}
+	}
+	m_pDlgImage->Invalidate();
+}
+
+
+void CgPrjDlg::OnBnClickedBtnGetData()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+	int nWidth = m_pDlgImage->m_image.GetWidth();
+	int nHeight = m_pDlgImage->m_image.GetHeight();
+	int nPitch = m_pDlgImage->m_image.GetPitch();
+
+	int nTh = 0x80;
+	CRect rect(0, 0, nWidth, nHeight);
+	int nSumX = 0;
+	int nSumY = 0;
+	int nCount = 0;
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			if (fm[j * nPitch + i] > nTh) {
+				nSumX += i;
+				nSumY += j;
+				nCount++;
+			}
+		}
+	}
+
+	double dCenterX = nSumX / nCount;
+	double dCenterY = nSumY / nCount;
+
+	cout << dCenterX << "\t" << dCenterY << endl;
 
 }
